@@ -1,0 +1,744 @@
+
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Web MIDI API</title>
+	<style>
+    body {
+	  background-color: #1F2125;
+	  color: #000;
+	  min-height: 100%;
+	  height: 100%;
+	  font-family: "Open Sans";
+	  font-weigth: 100;
+	  filter:invert(100%);
+	  transition: background-color ease-out 1s
+	}
+	
+	body {
+	  text-align: center;
+	  padding-top: 5em;
+	}
+	
+		
+	*:before, *:after {
+		-webkit-box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		box-sizing: border-box;
+	}
+	h4 {
+		margin: 0 0 5px 0;
+	}
+	p {
+		margin: 0 0 10px 0;
+	}
+	#content, #device_info {
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 10px 0;
+		font-family: sans-serif;
+		font-size: 12px;
+		line-height: 12px;
+		letter-spacing: 1.5px;
+	}
+	#content, #key_data {
+		margin-top: 0px;
+		text-align: center;
+	}
+	#inputs, #outputs {
+		display: inline-block;
+		width: 49%;
+		margin-top: 10px;
+		vertical-align: top;
+	}
+	#outputs {
+		text-align: right;
+	}
+	.info {
+		padding: 20px;
+		border-radius: 3px;
+		box-shadow: inset 0 0 10px #ccc;
+		background-color: rgba(233,233,233,0.25);
+	}
+	.small {
+		border-bottom: 1px solid #ccc;
+		margin-left: 10px;
+	}
+	p:not(.small){
+		text-transform: uppercase;
+		font-weight: 800;
+	}
+	.button {
+		display: inline-block;
+		width: 100px;
+		height: 100px;
+		margin: 10px;
+		background-color: #00adef;
+		border-radius: 10px;
+		opacity: 1;
+		cursor: pointer;
+		border: 2px solid white;
+		transition: all 0.2s;
+	}
+	.button.active {
+		background-color: #9a6aad;
+		opacity: 0.25;
+		box-shadow: inset 0px 0px 30px orange;
+		border: 2px solid rgba(100,100,100,0.3);
+		animation: shake .2s ease-in-out;
+	}
+	@keyframes shake {
+		0% {
+			transform: translateX(0);
+			transform: translateY(0);
+			transform: scale(1,1);
+		}
+		20% {
+			transform: translateX(-10px);
+			transform: translateY(-100px);
+			transform: scale(0.5,0.75);
+		}
+		40% {
+			transform: translateX(10px);
+			transform: translateY(0px);
+			transform: scale(1.5,2);
+		}
+		60% {
+			transform: translateX(-10px);
+			transform: translateY(-50px);
+			transform: scale(0.5,0.75);
+		}
+		80% {
+			transform: translateX(10px);
+			transform: translateY(50px);
+			transform: scale(1.3,2);
+		}
+		100% {
+			transform: translateX(0);
+			transform: translateY(0);
+		}
+	}
+		
+		knob-input {
+	  width: auto;
+	  height: auto;
+	  display: inline-block;
+	  cursor: pointer;
+	  position: relative;
+	  margin: 0 2em;
+	}
+	
+	knob-hand {
+	  width: 0.6em;
+	  background-color: transparent;
+	  box-sizing: border-box;
+	  border-bottom: 1.6em solid #E3E1E1;
+	  height: 100%;
+	  position: absolute;
+	  left: 50%;
+	  margin-left: -0.3em;
+	}
+	
+	knob-face {
+	  display: inline-block;
+	  width: 10em;
+	  height: 10em;
+	  border: 1em solid #E3E1E1;
+	  box-sizing: border-box;
+	  border-radius: 10em;
+	  cursor: pointer;
+	  position: absolute;
+	  background-color: #1F2125;
+	  z-index: 2;
+	}
+	
+	.blue {
+	  font-size: .6em;
+	}
+	
+	.knobInput-label {
+	  display: block;
+	  text-align: center;
+	  font-size: 1.2em;
+	}
+	
+	.knob-progress {
+	  position: relative;
+	  top: 0;
+	  left: 0;
+	  z-index: 1;
+	}
+	
+	.hidden {
+	  display: none;
+	}
+	
+	.noSelection ::selection {
+	  /*background: transparent;*/
+	}
+	
+	.noSelection {
+	  -webkit-touch-callout: none;
+	  -webkit-user-select: none;
+	  -khtml-user-select: none;
+	  -moz-user-select: none;
+	  -ms-user-select: none;
+	  user-select: none;
+	  min-height: 100%;
+	  height: 100%;
+	}
+	
+		
+	</style>
+</head>
+<body>
+	<div id="content">
+		<div class="button" data-key="q" data-sound="audio/dinky-kick.mp3"></div>
+		<div class="button" data-key="w" data-sound="audio/dinky-snare.mp3"></div>
+		<div class="button" data-key="e" data-sound="audio/dinky-hat-2.mp3"></div>
+		<div class="button" data-key="r" data-sound="audio/dinky-cym.mp3"></div>
+		<div class="button" data-key="t" data-sound="audio/dinky-cym-noise.mp3"></div>
+	</div>
+	<div id="device_info">
+		<div id="key_data"></div>
+		<div id="inputs"></div>
+		<div id="outputs"></div>
+	</div>
+
+<form onchange="updateKnob()" >
+<input  type="range" min="0" max="100"
+       data-degree-range="180" data-degree-offset="0" value="0" step="2" class="blue" id="knob01"  />
+
+<input id="pink" type="range" min="5" max="50"
+       data-degree-range="0" data-degree-offset="0" step="0.5" value="12.5" id="knob02" />
+
+<input type="range" min="5" max="50"
+       data-degree-range="0" data-degree-offset="45" step="0.5" value="10" class="blue" id="knob03" />
+  </form>
+    <script>
+	
+	var tagBase = "knob";
+	var newElms = ["input","face", "hand"];
+	newElms.forEach(function(newElm){
+	          
+	          document.registerElement(tagBase + "-" + newElm, {
+						  prototype: Object.create(HTMLElement.prototype)
+						});
+	        });
+	
+	function rangeKnob(elm, progWidth, progColor, className) {
+	
+				
+	  			var focused = null;
+	  			var mouse = {};
+	  			var speed =  1;
+					var minVal, maxVal, min, max, degRange, valRange, rosetta, label, step, startingValue;
+	  
+	  
+	  			if(!className){
+	          className= "";
+	        }
+	
+	  			for(var i = 0; i<elm.length; i++){
+	          
+	            var node = elm[i];
+	
+	          	step = node.getAttribute("step");
+	            maxVal = node.max;
+	            minVal = node.min;
+	            min = node.getAttribute("data-degree-offset");
+	          
+	            degRange = node.getAttribute("data-degree-range");
+	            max = parseInt(min) + parseInt(degRange);
+	            valRange = maxVal- minVal;
+	            rosetta = degRange / valRange;
+							startingValue = node.getAttribute("value");	
+	          
+	  
+	            var parent = node.parentNode;
+	            var sibling = node.nextSibling;   	
+	            var wrapper = document.createElement("div");
+	            var knob = document.createElement(tagBase + "-input");
+	          	knob.className = "knobInput " + className + " "+ node.className;
+	                    	node.className = node.className + " hidden";
+	            var face = document.createElement(tagBase + "-face");
+	          	face.className = "knobInput-face";
+	           	
+	            rotate(face, min);
+	
+	            
+	          	var label = document.createElement("label");
+	         		label.className = "knobInput-label";
+	            var progress = document.createElement("canvas");
+	
+	          progress.className = "knob-progress";
+	          label.innerHTML = node.value;
+	          knob.setAttribute("data-original-element", node.id);
+	          knob.setAttribute("data-rosetta", rosetta);
+	          knob.setAttribute("min", minVal);
+	          var hand = document.createElement(tagBase + "-hand");
+	
+	          knob.appendChild(face);
+	          knob.appendChild(progress);
+						knob.appendChild(label);
+	          face.appendChild(hand);
+						knob.appendChild(node);
+	         
+	                
+	          if(sibling){
+	            parent.insertBefore(knob, sibling)
+	          } else{
+	            parent.appendChild(knob);
+	          }
+	          
+	          
+	          if(startingValue){
+	            
+	            	
+	            	var degrees = (startingValue - minVal) * rosetta;
+								degrees = parseInt(degrees) + parseInt(min);
+	            	rotate(face, degrees);
+	             
+	              var rad = parseInt(getCSS(face, "width"))/ 2;
+
+	            }
+	            
+
+	          knob.addEventListener("mousedown", function(e){
+	              focused = this;
+	              mouse.clickPos = e.pageY;
+	              mouse.lastPos = e.pageY;
+								document.body.className += "noSelection";
+	          });
+	
+	    		document.addEventListener("mousemove", function(e){
+						if(focused){
+	            if(!mouse.lastPos){
+								mouse.lastPos = mouse.clickPos;
+	            }
+	             var originalNode = focused.childNodes[3];
+	            var min = originalNode.getAttribute("data-degree-offset");
+							var degRange = originalNode.getAttribute("data-degree-range");
+	            var max = parseInt(min) + parseInt(degRange);
+	            
+	          	newPos = e.pageY;
+	            var diff = (mouse.lastPos - newPos) * speed;
+	            var rot = focused.firstChild.style.transform || 0; 
+	         		if(rot !== 0){
+	              rot=parseInt(rot.replace("rotate(", "").replace("deg)", ""));
+	            }
+							      
+							var newRot = rot + diff * speed;  
+	  
+	            
+	            if(newRot < min){
+	              newRot = min;
+	            }
+	            
+	            if(newRot > max){
+	              newRot = max;
+	            }
+	    			
+	
+	            var newVal = (newRot-min) / focused.getAttribute("data-rosetta") + parseInt(focused.getAttribute("min"));
+	           	var step = originalNode.getAttribute("step");
+	           	var stepped = (~~(newVal/step) * step);
+	         		var lastVal = originalNode.value;
+	            originalNode.value = stepped;
+	        		
+	        		var rad = parseInt(getCSS(focused.firstChild, "width"))/ 2;
+	            
+	            if(stepped == minVal){
+	              clearCanvas(focused.firstChild.nextSibling);
+	            } else{
+	                drawArc(focused.firstChild.nextSibling, rad * 2, newRot, min, progWidth, progColor);
+	            }
+	
+	                    
+			 				//focused.firstChild.style.transform = "rotate("+ newRot +"deg)";
+	            
+	            rotate(focused.firstChild, newRot);
+	            
+	            focused.childNodes[2].innerHTML = stepped;
+	        		mouse.lastPos = newPos;
+	            
+	            if(lastVal !== stepped){ //only trigger event if value is new
+			           simulateEvent('input', originalNode);
+	            }
+	          }	
+	        });
+	  
+	  
+	  			document.addEventListener("mouseup", function(e){
+							focused = null;
+	          	document.body.className = document.body.className.replace("noSelection", "");
+	        });
+	  
+	   
+	            
+	  		  var w = parseInt(getCSS(face, "width"));
+	        
+					w = w + progWidth;
+	    
+	        progress.setAttribute("height", w * 2);
+	        progress.setAttribute("width", w * 2);
+	        progress.style.width = w+"px";
+	        progress.style.height = w+"px";
+	        face.style.marginTop = (progWidth/2)+"px";
+	        face.style.marginLeft = (progWidth/2)+"px";
+		
+	         drawArc(progress, rad * 2, degrees, parseInt(min), progWidth, progColor);
+	      } //end loop
+	
+	}
+	
+	function clearCanvas(canvas){
+	  var ctx = canvas.getContext("2d");
+	  ctx.clearRect ( 0 , 0 , canvas.width,   canvas.height );
+	}
+	
+	function drawArc(canvas, radius, deg, min, lw, col){
+	  			//console.log(canvas, radius, deg, min, lw, col);
+	        var ctx = canvas.getContext("2d");
+				  clearCanvas(canvas);
+					ctx.beginPath();          
+	        ctx.arc(canvas.width / 2, canvas.height / 2,radius, toRad(90 + parseInt(min)), toRad(90+ deg), false); 
+	    		ctx.strokeStyle = col;
+	  			ctx.lineWidth = lw * 2;
+					ctx.stroke();
+	}
+	
+	function simulateEvent(ev, elm) {
+	  var event = new Event('input', {
+	    'view': window
+	  });
+	  var cb = elm; 
+	  cb.dispatchEvent(event);
+	}
+	
+	function toRad(deg){
+	  var rad = deg / (180 / Math.PI);
+	  return rad;
+	}
+	
+	
+	function rotate(elm, deg){
+	    elm.style.transform = "rotate("+ deg +"deg)"; 
+	}
+	
+	function getCSS(elm, prop){
+	  return window.getComputedStyle(elm, prop).getPropertyValue(prop);
+	}
+	
+	
+	rangeKnob(document.querySelectorAll('.blue'), 20, "#525AD9");
+	
+	rangeKnob([document.getElementById('pink')], 30, "#D952AC");
+    
+    
+// nk
+
+	function loop(){window.setInterval(updateKnob,100)}		
+	function updateKnob(){
+		var yop = (document.getElementById('key_data').innerHTML.slice(64,67).replace(']',''))*2.83464
+	
+		document.getElementById('knob01').value = yop
+		document.getElementsByClassName('knobInput-face')[0].style.transform = "rotate("+document.getElementById('knob01').value+"deg)"
+		document.getElementsByClassName('knobInput-label')[0].innerHTML = document.getElementById('knob01').value
+
+		document.getElementById('knob01').value = yop
+		document.getElementsByClassName('knobInput-face')[1].style.transform = "rotate("+yop+"deg)"
+		document.getElementsByClassName('knobInput-label')[1].innerHTML = yop
+	}
+	
+	function randomColor() {
+	    return [
+	        Math.floor(Math.random() * 255),
+	        Math.floor(Math.random() * 255),
+	        Math.floor(Math.random() * 255)];
+	}
+
+   function upBck(){
+	document.body.style.backgroundColor = 'rgb('+randomColor()+')'
+	document.getElementsByClassName('button')[0].style.backgroundColor = 'rgb('+randomColor()+')'
+	document.getElementsByClassName('button')[1].style.backgroundColor = 'rgb('+randomColor()+')'
+	document.getElementsByClassName('button')[2].style.backgroundColor = 'rgb('+randomColor()+')'
+	document.getElementsByClassName('button')[3].style.backgroundColor = 'rgb('+randomColor()+')'
+	document.getElementsByClassName('button')[4].style.backgroundColor = 'rgb('+randomColor()+')'
+
+   }
+   
+// OOooOOO
+
+	(function(){
+		var log = console.log.bind(console), keyData = document.getElementById('key_data'), 
+				deviceInfoInputs = document.getElementById('inputs'), deviceInfoOutputs = document.getElementById('outputs'), midi;
+		var AudioContext = AudioContext || webkitAudioContext; // for ios/safari
+		var context = new AudioContext();
+		var activeNotes = [];
+		var btnBox = document.getElementById('content'), btn = document.getElementsByClassName('button');
+		var data, cmd, channel, type, note, velocity;
+
+		// request MIDI access
+		if(navigator.requestMIDIAccess){
+			navigator.requestMIDIAccess({sysex: false}).then(onMIDISuccess, onMIDIFailure);
+		}
+		else {
+			alert("No MIDI support in your browser.");
+		}
+
+		// add event listeners
+		document.addEventListener('keydown', keyController);
+		document.addEventListener('keyup', keyController);
+		for(var i = 0; i < btn.length; i++){
+			btn[i].addEventListener('mousedown', clickPlayOn);
+			btn[i].addEventListener('mouseup', clickPlayOff);	
+		}
+		// prepare audio files
+		for(var i = 0; i < btn.length; i++){
+			addAudioProperties(btn[i]);
+		}
+
+		var sampleMap = {
+			key60: 1,
+			key61: 2,
+			key62: 3,
+			key63: 4,
+			key64: 5
+		};
+		// user interaction 
+		function clickPlayOn(e){
+			e.target.classList.add('active');
+			e.target.play();
+		}
+		
+		function clickPlayOff(e){
+			e.target.classList.remove('active');
+		}
+
+		function keyController(e){
+			if(e.type == "keydown"){
+				switch(e.keyCode){
+					case 81:
+						btn[0].classList.add('active');
+						btn[0].play();
+						break;
+					case 87:
+						btn[1].classList.add('active');
+						btn[1].play();
+						break;
+					case 69:
+						btn[2].classList.add('active');
+						btn[2].play();
+						break;
+					case 82:
+						btn[3].classList.add('active');
+						btn[3].play();
+						break;
+					case 84:
+						btn[4].classList.add('active');
+						btn[4].play();
+						break;					
+					default:
+						//console.log(e);
+				}
+			}
+			else if(e.type == "keyup"){
+				switch(e.keyCode){
+					case 81:
+						btn[0].classList.remove('active');
+						break;
+					case 87:
+						btn[1].classList.remove('active');
+						break;
+					case 69:
+						btn[2].classList.remove('active');
+						break;
+					case 82:
+						btn[3].classList.remove('active');
+						break;
+					case 84:
+						btn[4].classList.remove('active');
+						break;
+					default:
+						//console.log(e.keyCode);
+				}
+			}
+		}
+
+		// midi functions
+		function onMIDISuccess(midiAccess){
+			midi = midiAccess;
+			var inputs = midi.inputs.values();
+			// loop through all inputs
+			for(var input = inputs.next(); input && !input.done; input = inputs.next()){
+				// listen for midi messages
+				input.value.onmidimessage = onMIDIMessage;
+
+				listInputs(input);
+			}
+			// listen for connect/disconnect message
+			midi.onstatechange = onStateChange;
+
+			showMIDIPorts(midi);
+		}
+
+		function onMIDIMessage(event){
+			data = event.data,
+			cmd = data[0] >> 4,
+			channel = data[0] & 0xf,
+			type = data[0] & 0xf0, // channel agnostic message type. Thanks, Phil Burk.
+			note = data[1],
+			velocity = data[2];
+			// with pressure and tilt off
+			// note off: 128, cmd: 8 
+			// note on: 144, cmd: 9
+			// pressure / tilt on
+			// pressure: 176, cmd 11: 
+			// bend: 224, cmd: 14
+			log('MIDI data', data);
+			switch(type){
+				case 144: // noteOn message 
+					noteOn(note, velocity);
+					break;
+				case 128: // noteOff message 
+					noteOff(note, velocity);
+					break;
+			}
+			
+			//log('data', data, 'cmd', cmd, 'channel', channel);
+			logger(keyData, 'key data', data);
+		}
+
+		function onStateChange(event){
+			showMIDIPorts(midi);
+			var port = event.port, state = port.state, name = port.name, type = port.type;
+			if(type == "input")
+				log("name", name, "port", port, "state", state);
+
+		}
+
+		function listInputs(inputs){
+			var input = inputs.value;
+				log("Input port : [ type:'" + input.type + "' id: '" + input.id + 
+						"' manufacturer: '" + input.manufacturer + "' name: '" + input.name + 
+						"' version: '" + input.version + "']");
+		}
+
+		function noteOn(midiNote, velocity){
+			player(midiNote, velocity);
+		}
+
+		function noteOff(midiNote, velocity){
+			player(midiNote, velocity);
+		}
+
+		function player(note, velocity){
+			var sample = sampleMap['key'+note];
+			if(sample){
+				if(type == (0x80 & 0xf0) || velocity == 0){ //needs to be fixed for QuNexus, which always returns 144
+					btn[sample - 1].classList.remove('active');
+					return;
+				}
+				btn[sample - 1].classList.add('active');
+				btn[sample - 1].play(velocity);
+			}
+		}
+
+		function onMIDIFailure(e){
+			log("No access to MIDI devices or your browser doesn't support WebMIDI API. Please use WebMIDIAPIShim " + e);
+		}
+
+		// MIDI utility functions
+		function showMIDIPorts(midiAccess){
+			var inputs = midiAccess.inputs,
+					outputs = midiAccess.outputs, 
+					html;
+			html = '<h4>MIDI Inputs:</h4><div class="info">';
+			inputs.forEach(function(port){
+				html += '<p>' + port.name + '<p>';
+				html += '<p class="small">connection: ' + port.connection + '</p>';
+				html += '<p class="small">state: ' + port.state + '</p>';
+				html += '<p class="small">manufacturer: ' + port.manufacturer + '</p>';
+				if(port.version){
+					html += '<p class="small">version: ' + port.version + '</p>';
+				}
+			});
+			deviceInfoInputs.innerHTML = html + '</div>';
+
+			html = '<h4>MIDI Outputs:</h4><div class="info">';
+			outputs.forEach(function(port){
+				html += '<p>' + port.name + '<br>';
+				html += '<p class="small">manufacturer: ' + port.manufacturer + '</p>';
+				if(port.version){
+					html += '<p class="small">version: ' + port.version + '</p>';
+				}
+			});
+			deviceInfoOutputs.innerHTML = html + '</div>';
+		}
+
+		// audio functions
+		function loadAudio(object, url){
+			var request = new XMLHttpRequest();
+			request.open('GET', url, true);
+			request.responseType = 'arraybuffer';
+			request.onload = function(){
+				context.decodeAudioData(request.response, function(buffer){
+					object.buffer = buffer;
+				});
+			}
+			request.send();
+		}
+
+		function addAudioProperties(object){
+			object.name = object.id;
+			object.source = object.dataset.sound;
+			loadAudio(object, object.source);
+			object.play = function(volume){
+				var s = context.createBufferSource();
+				var g = context.createGain();
+				var v;
+				s.buffer = object.buffer;
+				s.playbackRate.value = randomRange(0.5, 2);
+				if(volume){
+					v = rangeMap(volume, 1, 127, 0.2, 2);
+					s.connect(g);
+					g.gain.value = v * v;
+					g.connect(context.destination);
+				}
+				else{
+					s.connect(context.destination);	
+				}
+				
+				s.start();
+				object.s = s;
+			}
+		}
+
+		// utility functions
+		function randomRange(min, max){
+			return Math.random() * (max + min) + min;
+		}
+
+		function rangeMap(x, a1, a2, b1, b2){
+			return ((x - a1)/(a2-a1)) * (b2 - b1) + b1;
+		}
+
+		function frequencyFromNoteNumber( note ) {
+			return 440 * Math.pow(2,(note-69)/12);
+		}
+
+		function logger(container, label, data){
+			// Background-color change 
+			upBck()
+			// logs
+			messages = label + " [channel: " + (data[0] & 0xf) + ", cmd: " + (data[0] >> 4) + ", type: " + (data[0] & 0xf0) + " , note: " + data[1] + " , velocity: " + data[2] + "]";
+			container.textContent = messages;
+		}
+
+	})();
+	
+	loop()
+	</script>
+</body>
+</html>
