@@ -1,5 +1,5 @@
 # midiKnobControl
-### Midi control input type range with javascript
+### Midi control html elements with javascript.
 
 ![](http://i.imgur.com/WC1ARO2.gif)
 
