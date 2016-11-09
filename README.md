@@ -3,7 +3,7 @@
 
 ![](http://i.imgur.com/WC1ARO2.gif)
 
-[Demo, any midii device will work](https://ponyhacks.com/open/apps/midiKnobControl/)
+[Demo, any midi device should work](https://ponyhacks.com/open/apps/midiKnobControl/)
 
 Any midi CC on any channels will trigger the knob.<br>
 The knob controls the page color. <br>
