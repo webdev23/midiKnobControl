@@ -252,7 +252,7 @@
               max = parseInt(min) + parseInt(degRange);
               valRange = maxVal- minVal;
               rosetta = degRange / valRange;
-        startingValue = node.getAttribute("value"); 
+              startingValue = node.getAttribute("value"); 
             
     
               var parent = node.parentNode;
@@ -267,49 +267,49 @@
               rotate(face, min);
   
               
-            var label = document.createElement("label");
-            label.className = "knobInput-label";
-            var progress = document.createElement("canvas");
+              var label = document.createElement("label");
+              label.className = "knobInput-label";
+              var progress = document.createElement("canvas");
   
-            progress.className = "knob-progress";
-            label.innerHTML = node.value;
-            knob.setAttribute("data-original-element", node.id);
-            knob.setAttribute("data-rosetta", rosetta);
-            knob.setAttribute("min", minVal);
-            var hand = document.createElement(tagBase + "-hand");
+              progress.className = "knob-progress";
+              label.innerHTML = node.value;
+              knob.setAttribute("data-original-element", node.id);
+              knob.setAttribute("data-rosetta", rosetta);
+              knob.setAttribute("min", minVal);
+              var hand = document.createElement(tagBase + "-hand");
   
-            knob.appendChild(face);
-            knob.appendChild(progress);
-      knob.appendChild(label);
-            face.appendChild(hand);
-      knob.appendChild(node);
+              knob.appendChild(face);
+              knob.appendChild(progress);
+              knob.appendChild(label);
+              face.appendChild(hand);
+              knob.appendChild(node);
            
                   
-          if(sibling){
-              parent.insertBefore(knob, sibling)
-            } else{
-              parent.appendChild(knob);
-            }
+              if(sibling){
+                  parent.insertBefore(knob, sibling)
+               } else{
+                    parent.appendChild(knob);
+               }
             
             
-            if(startingValue){
-               var degrees = (startingValue - minVal) * rosetta;
-       degrees = parseInt(degrees) + parseInt(min);
-                rotate(face, degrees);
+              if(startingValue){
+                  var degrees = (startingValue - minVal) * rosetta;
+                  degrees = parseInt(degrees) + parseInt(min);
+                  rotate(face, degrees);
                
-                var rad = parseInt(getCSS(face, "width"))/ 2;
+                  var rad = parseInt(getCSS(face, "width"))/ 2;
 
               }
               
 
-            knob.addEventListener("mousedown", function(e){
-                focused = this;
-                mouse.clickPos = e.pageY;
-                mouse.lastPos = e.pageY;
-          document.body.className += "noSelection";
+                knob.addEventListener("mousedown", function(e){
+                  focused = this;
+                  mouse.clickPos = e.pageY;
+                  mouse.lastPos = e.pageY;
+                  document.body.className += "noSelection";
             });
   
-              document.addEventListener("mousemove", function(e){
+     document.addEventListener("mousemove", function(e){
     if(focused){
               if(!mouse.lastPos){
           mouse.lastPos = mouse.clickPos;
@@ -386,12 +386,12 @@
   
   }
   
-     function clearCanvas(canvas){
+  function clearCanvas(canvas){
     var ctx = canvas.getContext("2d");
     ctx.clearRect ( 0 , 0 , canvas.width,   canvas.height );
   }
   
-     function drawArc(canvas, radius, deg, min, lw, col){
+  function drawArc(canvas, radius, deg, min, lw, col){
           //console.log(canvas, radius, deg, min, lw, col);
           var ctx = canvas.getContext("2d");
           clearCanvas(canvas);
@@ -402,7 +402,7 @@
           ctx.stroke();
   }
   
-     function simulateEvent(ev, elm) {
+function simulateEvent(ev, elm) {
     var event = new Event('input', {
       'view': window
     });
@@ -410,47 +410,48 @@
     cb.dispatchEvent(event);
   }
   
-      function toRad(deg){
+ function toRad(deg){
     var rad = deg / (180 / Math.PI);
     return rad;
   }
   
   
-      function rotate(elm, deg){
+ function rotate(elm, deg){
       elm.style.transform = "rotate("+ deg +"deg)"; 
   }
   
-      function getCSS(elm, prop){
+ function getCSS(elm, prop){
     return window.getComputedStyle(elm, prop).getPropertyValue(prop);
   }
   
   
-  rangeKnob(document.querySelectorAll('.blue'), 20, "#525AD9");
+rangeKnob(document.querySelectorAll('.blue'), 20, "#525AD9");
   
-  rangeKnob([document.getElementById('pink')], 30, "#D952AC");
+rangeKnob([document.getElementById('pink')], 30, "#D952AC");
     
     
 // nk
 
-     function loop(){window.setInterval(updateKnob,100)}    
-     function updateKnob(){
-    var yop = (document.getElementById('key_data').innerHTML.slice(64,67).replace(']',''))*2.83464
-    document.getElementById('knob01').value = yop
-    document.getElementsByClassName('knobInput-face')[0].style.transform = "rotate("+document.getElementById('knob01').value+"deg)"
-    document.getElementsByClassName('knobInput-label')[0].innerHTML = document.getElementById('knob01').value
-    document.getElementById('knob01').value = yop
-    document.getElementsByClassName('knobInput-face')[1].style.transform = "rotate("+yop+"deg)"
-    document.getElementsByClassName('knobInput-label')[1].innerHTML = yop
+ function loop(){window.setInterval(updateKnob,100)}    
+ 
+ function updateKnob(){
+       var yop = (document.getElementById('key_data').innerHTML.slice(64,67).replace(']',''))*2.83464
+       document.getElementById('knob01').value = yop
+       document.getElementsByClassName('knobInput-face')[0].style.transform = "rotate("+document.getElementById('knob01').value+"deg)"
+       document.getElementsByClassName('knobInput-label')[0].innerHTML = document.getElementById('knob01').value
+       document.getElementById('knob01').value = yop
+       document.getElementsByClassName('knobInput-face')[1].style.transform = "rotate("+yop+"deg)"
+      document.getElementsByClassName('knobInput-label')[1].innerHTML = yop
   }
   
-    function randomColor() {
+ function randomColor() {
       return [
           Math.floor(Math.random() * 255),
           Math.floor(Math.random() * 255),
           Math.floor(Math.random() * 255)];
   }
 
-    function upBck(){
+ function upBck(){
           document.body.style.backgroundColor = 'rgb('+randomColor()+')'
           document.getElementsByClassName('button')[0].style.backgroundColor = 'rgb('+randomColor()+')'
           document.getElementsByClassName('button')[1].style.backgroundColor = 'rgb('+randomColor()+')'
@@ -461,7 +462,7 @@
    
 // OOooOOO
 
-     (function(){
+(function(){
     var log = console.log.bind(console), keyData = document.getElementById('key_data'), 
     deviceInfoInputs = document.getElementById('inputs'), deviceInfoOutputs = document.getElementById('outputs'), midi;
     var AudioContext = AudioContext || webkitAudioContext; // for ios/safari
